@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHRONOS - Luxury Timepieces</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        luxury: {
+                            black: '#0a0a0a',
+                            dark: '#121212',
+                            gold: '#d4af37',
+                            goldLight: '#f3e5ab',
+                            silver: '#e0e0e0',
+                            gray: '#2a2a2a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    backgroundImage: {
+                        'radial-glow': 'radial-gradient(circle at center, #2a2a2a 0%, #0a0a0a 70%)',
+                        'gold-gradient': 'linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        /* Glassmorphism */
+        .glass-nav {
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(212, 175, 55, 0.5);
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Text Gradients */
+        .text-gold-gradient {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Watch Animation Container */
+        .watch-container {
+            position: relative;
+            perspective: 1000px;
+        }
+        
+        .floating-watch {
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.8));
+            transform-style: preserve-3d;
+        }
+
+        .glow-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.2) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Preloader */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loader-circle {
+            width: 50px;
+            height: 50px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-top: 2px solid #d4af37;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Nav Link Hover */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -5px;
+            left: 0;
+            background-color: #d4af37;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Notification Toast */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #1a1a1a;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 100;
+            right: 30px;
+            bottom: 30px;
+            font-size: 14px;
+            border-left: 4px solid #d4af37;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transform: translateY(100%);
+            transition: all 0.3s ease;
+        }
+        #toast.show {
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Hide Scrollbar for specific elements */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased selection:bg-luxury-gold selection:text-black">
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="font-serif text-3xl text-luxury-gold mb-4 tracking-widest">CHRONOS</div>
+        <div class="loader-circle"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="glass-nav fixed w-full z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 cursor-pointer" onclick="router('home')">
+                    <span class="font-serif text-2xl font-bold text-white tracking-wider">CHRON<span class="text-luxury-gold">OS</span></span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#" onclick="router('home')" class="nav-link text-sm font-medium text-white hover:text-luxury-gold transition-colors">Home</a>
+                        <a href="#" onclick="router('men')" class="nav-link text-sm font-medium text-gray-300 hover:text-luxury-gold transition-colors">Men</a>
+                        <a href="#" onclick="router('women')" class="nav-link text-sm font-medium text-gray-300 hover:text-luxury-gold transition-colors">Women</a>
+                        <a href="#" onclick="router('smart')" class="nav-link text-sm font-medium text-gray-300 hover:text-luxury-gold transition-colors">Smart</a>
+                        <a href="#" onclick="router('collection')" class="nav-link text-sm font-medium text-gray-300 hover:text-luxury-gold transition-colors">Collection</a>
+                        <a href="#" onclick="router('about')" class="nav-link text-sm font-medium text-gray-300 hover:text-luxury-gold transition-colors">About</a>
+                        <a href="#" onclick="router('contact')" class="nav-link text-sm font-medium text-gray-300 hover:text-luxury-gold transition-colors">Contact</a>
+                    </div>
+                </div>
+
+                <!-- Icons -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <button class="text-gray-300 hover:text-luxury-gold transition-colors" onclick="toggleSearch()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="text-gray-300 hover:text-luxury-gold transition-colors relative" onclick="router('cart')">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-luxury-gold text-black text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center opacity-0 transition-opacity">0</span>
+                    </button>
+                    <button class="text-gray-300 hover:text-luxury-gold transition-colors" onclick="alert('Login feature coming soon.')">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button onclick="toggleMobileMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-luxury-dark border-t border-gray-800">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#" onclick="router('home')" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-luxury-gold">Home</a>
+                <a href="#" onclick="router('men')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-luxury-gold">Men</a>
+                <a href="#" onclick="router('women')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-luxury-gold">Women</a>
+                <a href="#" onclick="router('smart')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-luxury-gold">Smart</a>
+                <a href="#" onclick="router('collection')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-luxury-gold">Collection</a>
+                <a href="#" onclick="router('cart')" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-luxury-gold">Cart</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="pt-20 min-h-screen">
+        
+        <!-- HOME SECTION -->
+        <section id="home-page" class="page-section min-h-[90vh] flex flex-col md:flex-row items-center justify-center px-4 md:px-20 relative overflow-hidden bg-radial-glow">
+            
+            <!-- Text Content -->
+            <div class="w-full md:w-1/2 z-10 text-center md:text-left mt-10 md:mt-0 opacity-0 transform translate-y-10" id="hero-text">
+                <h2 class="text-luxury-gold text-lg md:text-xl font-medium tracking-[0.3em] uppercase mb-4">New Arrival</h2>
+                <h1 class="font-serif text-5xl md:text-7xl font-bold leading-tight mb-6 text-white">
+                    Luxury Watch <br> <span class="text-gold-gradient">Collection 2026</span>
+                </h1>
+                <p class="text-gray-400 text-lg mb-8 font-light max-w-lg mx-auto md:mx-0">
+                    Precision engineering meets timeless elegance. Discover the timepiece that defines your legacy and style.
+                </p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
+                    <button onclick="router('collection')" class="px-8 py-3 bg-luxury-gold text-black font-semibold rounded-sm hover:bg-white transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(212,175,55,0.4)]">
+                        Shop Now
+                    </button>
+                    <button onclick="router('about')" class="px-8 py-3 border border-luxury-gold text-luxury-gold font-semibold rounded-sm hover:bg-luxury-gold hover:text-black transition-all duration-300">
+                        Explore More
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3D Watch Animation -->
+            <div class="w-full md:w-1/2 flex justify-center items-center relative z-10 h-[50vh] md:h-auto">
+                <div class="watch-container">
+                    <div class="glow-effect"></div>
+                    <!-- Using a high quality watch image placeholder -->
+                    <img src="https://images.unsplash.com/photo-1622434641406-a158123450f9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                         alt="Luxury Watch" 
+                         id="hero-watch"
+                         class="floating-watch w-64 md:w-96 object-contain rounded-full shadow-2xl border-4 border-gray-800/50">
+                </div>
+            </div>
+
+            <!-- Background Decor -->
+            <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-luxury-gray/20 to-transparent pointer-events-none"></div>
+            
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer" onclick="scrollToNext()">
+                <i class="fas fa-chevron-down text-luxury-gold text-xl"></i>
+            </div>
+        </section>
+
+        <!-- Best Sellers Section (Home Part 2) -->
+        <section id="best-sellers" class="py-20 bg-luxury-black">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="font-serif text-4xl text-white mb-4">Best Sellers</h2>
+                    <div class="w-20 h-1 bg-luxury-gold mx-auto"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="featured-products">
+                    <!-- Javascript will inject cards here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- CATEGORY PAGES (Template for Men, Women, Smart, Collection) -->
+        <section id="product-grid-page" class="hidden pt-10 pb-20 px-4 md:px-12 bg-luxury-black min-h-screen">
+            <div class="text-center mb-12 mt-10">
+                <h2 id="page-title" class="font-serif text-4xl text-white mb-2">Collection</h2>
+                <p id="page-subtitle" class="text-gray-400">Curated specifically for you</p>
+            </div>
+            
+            <!-- Filters -->
+            <div class="flex flex-wrap justify-center gap-4 mb-10" id="filters-container">
+                <button class="px-4 py-2 border border-gray-700 rounded-full text-sm hover:border-luxury-gold hover:text-luxury-gold transition-colors active-filter">All</button>
+                <button class="px-4 py-2 border border-gray-700 rounded-full text-sm hover:border-luxury-gold hover:text-luxury-gold transition-colors">Under $500</button>
+                <button class="px-4 py-2 border border-gray-700 rounded-full text-sm hover:border-luxury-gold hover:text-luxury-gold transition-colors">Luxury</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" id="dynamic-grid">
+                <!-- Products Injected Here -->
+            </div>
+        </section>
+
+        <!-- ABOUT PAGE -->
+        <section id="about-page" class="hidden bg-luxury-black min-h-screen">
+            <div class="relative h-[60vh] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1548866750-6cb2e76fa2e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" class="w-full h-full object-cover opacity-50">
+                <div class="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+                    <h1 class="font-serif text-5xl md:text-7xl text-white font-bold mb-4">Our Heritage</h1>
+                    <p class="text-xl text-gray-300 max-w-2xl">Crafting moments into memories since 1920.</p>
+                </div>
+            </div>
+            <div class="max-w-4xl mx-auto py-20 px-6 text-center">
+                <h3 class="text-luxury-gold text-xl tracking-widest mb-4">THE STORY</h3>
+                <p class="text-gray-300 leading-relaxed text-lg mb-10">
+                    Born from a passion for precision and a dedication to artistry, CHRONOS represents the pinnacle of watchmaking. Every piece is a testament to the master craftsmen who spend hundreds of hours ensuring that every tick is perfect. We don't just sell watches; we curate time.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                    <div class="p-6 border border-gray-800 rounded-lg">
+                        <i class="fas fa-crown text-4xl text-luxury-gold mb-4"></i>
+                        <h4 class="text-white text-xl mb-2">Excellence</h4>
+                        <p class="text-gray-500 text-sm">Superior materials and Swiss movement.</p>
+                    </div>
+                    <div class="p-6 border border-gray-800 rounded-lg">
+                        <i class="fas fa-history text-4xl text-luxury-gold mb-4"></i>
+                        <h4 class="text-white text-xl mb-2">Tradition</h4>
+                        <p class="text-gray-500 text-sm">A century of horological innovation.</p>
+                    </div>
+                    <div class="p-6 border border-gray-800 rounded-lg">
+                        <i class="fas fa-globe text-4xl text-luxury-gold mb-4"></i>
+                        <h4 class="text-white text-xl mb-2">Global</h4>
+                        <p class="text-gray-500 text-sm">Worn by leaders and visionaries worldwide.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT PAGE -->
+        <section id="contact-page" class="hidden bg-luxury-black min-h-screen py-20 px-4">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-12 mt-10">
+                <div class="w-full md:w-1/2">
+                    <h2 class="font-serif text-4xl text-white mb-6">Get in Touch</h2>
+                    <p class="text-gray-400 mb-8">Visit our boutiques or send us a message for private consultations.</p>
+                    
+                    <form class="space-y-6" onsubmit="event.preventDefault(); showToast('Message Sent Successfully!');">
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">Name</label>
+                            <input type="text" class="w-full bg-gray-900 border border-gray-700 rounded p-3 text-white focus:border-luxury-gold focus:outline-none transition-colors" placeholder="John Doe" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">Email</label>
+                            <input type="email" class="w-full bg-gray-900 border border-gray-700 rounded p-3 text-white focus:border-luxury-gold focus:outline-none transition-colors" placeholder="john@example.com" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 mb-2 text-sm">Message</label>
+                            <textarea class="w-full bg-gray-900 border border-gray-700 rounded p-3 text-white h-32 focus:border-luxury-gold focus:outline-none transition-colors" placeholder="How can we help?" required></textarea>
+                        </div>
+                        <button class="w-full bg-luxury-gold text-black font-bold py-4 rounded hover:bg-white transition-colors">SEND MESSAGE</button>
+                    </form>
+
+                    <div class="flex gap-6 mt-8">
+                        <a href="#" class="text-gray-400 hover:text-luxury-gold text-2xl"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-luxury-gold text-2xl"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-luxury-gold text-2xl"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 h-[500px] bg-gray-800 rounded-lg overflow-hidden relative">
+                    <!-- Placeholder Map -->
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.15830869428!2d-74.119763973046!3d40.69766374874431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1645564756836!5m2!1sen!2s" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    <div class="absolute bottom-4 left-4 bg-black/80 p-4 backdrop-blur-sm rounded border-l-2 border-luxury-gold">
+                        <p class="text-white font-bold">Chronos Flagship</p>
+                        <p class="text-gray-400 text-sm">5th Avenue, NYC</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CART PAGE -->
+        <section id="cart-page" class="hidden bg-luxury-black min-h-screen py-20 px-4">
+            <div class="max-w-5xl mx-auto mt-10">
+                <h2 class="font-serif text-3xl text-white mb-8 border-b border-gray-800 pb-4">Shopping Cart</h2>
+                
+                <div id="cart-items-container" class="space-y-4 min-h-[200px]">
+                    <!-- Cart items injected here -->
+                    <p class="text-gray-500 text-center py-10">Your cart is empty.</p>
+                </div>
+
+                <div class="mt-10 border-t border-gray-800 pt-6 flex flex-col items-end">
+                    <div class="flex justify-between w-full md:w-1/3 mb-4 text-xl">
+                        <span class="text-gray-400">Total:</span>
+                        <span class="text-luxury-gold font-bold" id="cart-total">$0.00</span>
+                    </div>
+                    <button class="bg-luxury-gold text-black px-8 py-3 font-bold rounded hover:bg-white transition-colors w-full md:w-auto" onclick="alert('Proceeding to Checkout...')">
+                        CHECKOUT
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-gray-900 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div>
+                    <span class="font-serif text-2xl font-bold text-white tracking-wider">CHRON<span class="text-luxury-gold">OS</span></span>
+                    <p class="text-gray-500 mt-4 text-sm leading-6">Defining style through precision engineering and timeless design since 1920.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-sm">Shop</h4>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><a href="#" onclick="router('men')" class="hover:text-luxury-gold">Men's Watches</a></li>
+                        <li><a href="#" onclick="router('women')" class="hover:text-luxury-gold">Women's Watches</a></li>
+                        <li><a href="#" onclick="router('smart')" class="hover:text-luxury-gold">Smart Collection</a></li>
+                        <li><a href="#" onclick="router('collection')" class="hover:text-luxury-gold">New Arrivals</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-sm">Help</h4>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><a href="#" class="hover:text-luxury-gold">Shipping & Returns</a></li>
+                        <li><a href="#" class="hover:text-luxury-gold">Warranty</a></li>
+                        <li><a href="#" class="hover:text-luxury-gold">FAQ</a></li>
+                        <li><a href="#" class="hover:text-luxury-gold">Service Centers</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase tracking-wider text-sm">Newsletter</h4>
+                    <div class="flex">
+                        <input type="email" placeholder="Your email" class="bg-gray-900 text-white px-4 py-2 w-full text-sm focus:outline-none border border-gray-800 focus:border-luxury-gold">
+                        <button class="bg-luxury-gold px-4 py-2 text-black hover:bg-white transition-colors"><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-900 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-gray-600 text-sm">
+                <p>&copy; 2026 Chronos Luxury Watches. All rights reserved.</p>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white">Privacy Policy</a>
+                    <a href="#" class="hover:text-white">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast">Item added to cart</div>
+
+    <script>
+        // --- DATA & STATE ---
+        const products = [
+            { id: 1, name: "Royal Oak Gold", price: 45000, category: "men", img: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" },
+            { id: 2, name: "Cosmograph Silver", price: 12500, category: "men", img: "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" },
+            { id: 3, name: "Lady Datejust", price: 8900, category: "women", img: "https://images.unsplash.com/photo-1590736969955-71cc94801759?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" },
+            { id: 4, name: "Chronos Smart X", price: 899, category: "smart", img: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" },
+            { id: 5, name: "Nautilus Blue", price: 55000, category: "men", img: "https://images.unsplash.com/photo-1619134778706-7015533a6150?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" },
+            { id: 6, name: "Serpenti Gold", price: 15000, category: "women", img: "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" },
+            { id: 7, name: "Tech Series 5", price: 450, category: "smart", img: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" },
+            { id: 8, name: "Vintage 1960", price: 3200, category: "men", img: "https://images.unsplash.com/photo-1539874754764-5a96559165b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" },
+        ];
+
+        let cart = [];
+        let currentPage = 'home';
+
+        // --- LIFECYCLE ---
+        window.addEventListener('load', () => {
+            // Hide Preloader
+            const preloader = document.getElementById('preloader');
+            gsap.to(preloader, { opacity: 0, duration: 0.8, onComplete: () => preloader.style.display = 'none' });
+            
+            // Init Hero Animation
+            animateHero();
+            
+            // Render Featured
+            renderProducts(products.slice(0, 3), 'featured-products');
+        });
+
+        // --- ANIMATIONS ---
+        function animateHero() {
+            // Text Fade In
+            gsap.to("#hero-text", {
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: "power3.out",
+                delay: 0.5
+            });
+
+            // Watch Rotation & Float
+            // Rotation on Z axis continuously
+            gsap.to("#hero-watch", {
+                rotation: 360,
+                duration: 20,
+                repeat: -1,
+                ease: "linear"
+            });
+
+            // Floating Effect (Y-axis)
+            gsap.to(".floating-watch", {
+                y: 20,
+                duration: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+            
+            // Scroll Triggers for Fade In
+            gsap.utils.toArray('.glass-card').forEach(card => {
+                gsap.from(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 85%",
+                    },
+                    opacity: 0,
+                    y: 50,
+                    duration: 0.8
+                });
+            });
+        }
+
+        // --- ROUTING ---
+        function router(page) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Hide all pages
+            const pages = ['home-page', 'best-sellers', 'product-grid-page', 'about-page', 'contact-page', 'cart-page'];
+            pages.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
+
+            // Show mobile menu hide if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+
+            // Logic per page
+            if (page === 'home') {
+                document.getElementById('home-page').classList.remove('hidden');
+                document.getElementById('best-sellers').classList.remove('hidden');
+                animateHero(); // Re-trigger if needed
+            } else if (page === 'men' || page === 'women' || page === 'smart' || page === 'collection') {
+                const gridPage = document.getElementById('product-grid-page');
+                gridPage.classList.remove('hidden');
+                
+                // Set Title
+                const titles = {
+                    'men': "Men's Collection",
+                    'women': "Women's Collection",
+                    'smart': "Smart Technology",
+                    'collection': "Full Collection"
+                };
+                document.getElementById('page-title').innerText = titles[page];
+                
+                // Filter and Render
+                let filtered = products;
+                if(page !== 'collection') {
+                    filtered = products.filter(p => p.category === page);
+                }
+                renderProducts(filtered, 'dynamic-grid');
+                
+                // Animation entrance
+                gsap.from("#dynamic-grid", { opacity: 0, y: 30, duration: 0.6, delay: 0.2 });
+
+            } else if (page === 'about') {
+                document.getElementById('about-page').classList.remove('hidden');
+                gsap.from("#about-page", { opacity: 0, duration: 0.5 });
+            } else if (page === 'contact') {
+                document.getElementById('contact-page').classList.remove('hidden');
+                gsap.from("#contact-page", { opacity: 0, y:20, duration: 0.5 });
+            } else if (page === 'cart') {
+                document.getElementById('cart-page').classList.remove('hidden');
+                renderCart();
+            }
+
+            currentPage = page;
+        }
+
+        // --- RENDER PRODUCTS ---
+        function renderProducts(items, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            items.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-xl overflow-hidden relative group p-4';
+                card.innerHTML = `
+                    <div class="h-64 overflow-hidden rounded-lg mb-4 relative flex items-center justify-center bg-gray-900/50">
+                        <img src="${product.img}" alt="${product.name}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <button onclick="addToCart(${product.id})" class="bg-luxury-gold text-black font-bold py-2 px-6 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-white">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-white text-lg font-medium mb-1">${product.name}</h3>
+                        <p class="text-luxury-gold font-bold">$${product.price.toLocaleString()}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- CART LOGIC ---
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCartCount();
+            showToast(`Added ${product.name} to cart`);
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            const el = document.getElementById('cart-count');
+            el.innerText = cart.length;
+            if(cart.length > 0) {
+                el.classList.remove('opacity-0');
+            } else {
+                el.classList.add('opacity-0');
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-12 text-xl">Your cart is empty</div>';
+                totalEl.innerText = "$0.00";
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.price;
+                html += `
+                    <div class="flex items-center justify-between bg-gray-900/50 p-4 rounded border border-gray-800">
+                        <div class="flex items-center gap-4">
+                            <img src="${item.img}" class="w-16 h-16 object-cover rounded">
+                            <div>
+                                <h4 class="text-white font-medium">${item.name}</h4>
+                                <p class="text-luxury-gold">$${item.price.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-gray-500 hover:text-red-500 transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            totalEl.innerText = "$" + total.toLocaleString();
+        }
+
+        // --- UTILS ---
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function scrollToNext() {
+            document.getElementById('best-sellers').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function toggleSearch() {
+            // Placeholder for search functionality
+            showToast("Search functionality coming soon");
+        }
+
+    </script>
+</body>
+</html>
